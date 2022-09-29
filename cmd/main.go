@@ -25,24 +25,8 @@ const (
 	ListAlbum = "ListAlbum"
 )
 
-func listLocalImages(cfg *configs.Config) map[string]bool {
-	imageFiles := make(map[string]bool)
-	files, err := ioutil.ReadDir(cfg.OutputPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-		imageFiles[strings.TrimSuffix(file.Name(), ".jpg")] = true
-	}
-	return imageFiles
-}
-
 func main() {
-	configFlag := flag.String("config", "config.yaml", "path to config.yaml")
+	configFlag := flag.String("config", "/config.yml", "path to config.yml")
 	commandFlag := flag.String("command", SyncImage, "command to execute")
 	flag.Parse()
 
@@ -63,6 +47,22 @@ func main() {
 	log.Println("Good bye...")
 }
 
+func listLocalImages(cfg *configs.Config) map[string]bool {
+	imageFiles := make(map[string]bool)
+	files, err := ioutil.ReadDir(cfg.OutputPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		imageFiles[strings.TrimSuffix(file.Name(), ".jpg")] = true
+	}
+	return imageFiles
+}
+
 func syncImage(cfg *configs.Config, svc *photoslibrary.Service) {
 	localImages := listLocalImages(cfg)
 	var pageToken string
@@ -79,6 +79,7 @@ func syncImage(cfg *configs.Config, svc *photoslibrary.Service) {
 		}
 
 		pageToken = items.NextPageToken
+		log.Println("Downloading image")
 		for _, item := range items.MediaItems {
 			// mediaItems = append(mediaItems, item)
 			fileName := getImageName(item.Id, cfg.OutputPath)
@@ -115,7 +116,7 @@ func deleteLocalFile(filename, outputPath string) {
 }
 
 func getImageName(id, outputPath string) string {
-	return fmt.Sprintf("%s%s.jpg", outputPath, id)
+	return fmt.Sprintf("%s/%s.jpg", outputPath, id)
 }
 
 // Skip download if file exist
@@ -128,7 +129,6 @@ func downloadImage(fileName, baseUrl string) error {
 		}
 		defer output.Close()
 
-		client.Get(url)
 		response, err := client.Get(url)
 		if err != nil {
 			return err
