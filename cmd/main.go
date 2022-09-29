@@ -26,7 +26,7 @@ const (
 )
 
 func main() {
-	configFlag := flag.String("config", "/config.yml", "path to config.yml")
+	configFlag := flag.String("config", "/configs/config.yml", "path to config.yml")
 	commandFlag := flag.String("command", SyncImage, "command to execute")
 	flag.Parse()
 
