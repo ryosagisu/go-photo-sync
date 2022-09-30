@@ -1,0 +1,6 @@
+credential_file: "credentials.json"
+credential_path: "/configs"
+
+output_path: "/google-photo"
+
+album_id: ""

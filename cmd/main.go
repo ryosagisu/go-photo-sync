@@ -58,14 +58,36 @@ func listLocalImages(cfg *configs.Config) map[string]bool {
 		if file.IsDir() {
 			continue
 		}
+
+		if !isValidImage(file.Name()) {
+			continue
+		}
 		imageFiles[strings.TrimSuffix(file.Name(), ".jpg")] = true
 	}
 	return imageFiles
 }
 
+func isValidImage(fileName string) bool {
+	f, err := os.Open(fileName)
+	if err != nil {
+		log.Printf("failed to open image: %v\n", err)
+		return false
+	}
+	defer f.Close()
+
+	buff := make([]byte, 512)
+	if _, err := f.Read(buff); err != nil {
+		log.Printf("failed to read image: %v\n", err)
+		return false
+	}
+
+	return http.DetectContentType(buff) == "image/jpeg"
+}
+
 func syncImage(cfg *configs.Config, svc *photoslibrary.Service) {
 	localImages := listLocalImages(cfg)
 	var pageToken string
+	log.Println("Downloading images...")
 	for {
 		req := &photoslibrary.SearchMediaItemsRequest{
 			PageSize:  100,
@@ -79,9 +101,7 @@ func syncImage(cfg *configs.Config, svc *photoslibrary.Service) {
 		}
 
 		pageToken = items.NextPageToken
-		log.Println("Downloading image")
 		for _, item := range items.MediaItems {
-			// mediaItems = append(mediaItems, item)
 			fileName := getImageName(item.Id, cfg.OutputPath)
 			if localImages[item.Id] {
 				localImages[item.Id] = false
@@ -98,6 +118,7 @@ func syncImage(cfg *configs.Config, svc *photoslibrary.Service) {
 		}
 	}
 
+	log.Println("Delete missing images...")
 	for k, v := range localImages {
 		if v {
 			deleteLocalFile(k, cfg.OutputPath)
