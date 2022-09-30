@@ -55,11 +55,12 @@ func listLocalImages(cfg *configs.Config) map[string]bool {
 	}
 
 	for _, file := range files {
-		if file.IsDir() {
+		if file.IsDir() || file.Size() == 0 {
 			continue
 		}
 
-		if !isValidImage(file.Name()) {
+		filePath := fmt.Sprintf("%s/%s", cfg.OutputPath, file.Name())
+		if !isValidImage(filePath) {
 			continue
 		}
 		imageFiles[strings.TrimSuffix(file.Name(), ".jpg")] = true
@@ -67,8 +68,8 @@ func listLocalImages(cfg *configs.Config) map[string]bool {
 	return imageFiles
 }
 
-func isValidImage(fileName string) bool {
-	f, err := os.Open(fileName)
+func isValidImage(filePath string) bool {
+	f, err := os.Open(filePath)
 	if err != nil {
 		log.Printf("failed to open image: %v\n", err)
 		return false
