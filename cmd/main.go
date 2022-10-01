@@ -26,6 +26,7 @@ const (
 )
 
 func main() {
+	log.Println("Starting go-google-photo-sync")
 	configFlag := flag.String("config", "/configs/config.yml", "path to config.yml")
 	commandFlag := flag.String("command", SyncImage, "command to execute")
 	flag.Parse()
@@ -43,7 +44,6 @@ func main() {
 	case ListAlbum:
 		listAlbum(svc)
 	}
-
 	log.Println("Good bye...")
 }
 

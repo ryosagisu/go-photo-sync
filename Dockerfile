@@ -13,7 +13,7 @@ ARG TARGETARCH
 RUN GOARCH=${TARGETARCH} go build -o /go-google-photos-sync ./cmd/main.go
 
 ### Deploy
-FROM gcr.io/distroless/base-debian11:latest
+FROM alpine:3.16
 
 WORKDIR /
 
