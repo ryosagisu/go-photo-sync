@@ -10,13 +10,15 @@ RUN go mod download
 
 ENV CGO_ENABLED=0
 ARG TARGETARCH
-RUN GOARCH=${TARGETARCH} go build -o /go-google-photos-sync ./cmd/main.go
+RUN GOARCH=${TARGETARCH} go build -o /go-photo-sync ./cmd/main.go
 
 ### Deploy
 FROM alpine:3.16
 
 WORKDIR /
 
-COPY --from=build /go-google-photos-sync /go-google-photos-sync
+COPY --from=build /go-photo-sync /go-photo-sync
 
-CMD ["/go-google-photos-sync"]
+ENV CONFIG_PATH=""
+ENTRYPOINT ["/go-photo-sync"]
+CMD ["-command=SyncImage"]

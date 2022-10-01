@@ -1,9 +1,8 @@
-package internal
+package google_photos
 
 import (
 	"encoding/json"
 	"fmt"
-	"google-photo-sync/configs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -16,9 +15,9 @@ import (
 )
 
 // GetService Retrieve a token, saves the token, then returns the generated client.
-func GetService(cfg *configs.Config) *photoslibrary.Service {
-	credentialPath := fmt.Sprintf("%s/%s", cfg.CredentialPath, cfg.CredentialFile)
-	b, err := ioutil.ReadFile(credentialPath)
+func GetService(credentialPath string) *photoslibrary.Service {
+	credentialFile := fmt.Sprintf("%s/credential.json", credentialPath)
+	b, err := ioutil.ReadFile(credentialFile)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
@@ -32,7 +31,7 @@ func GetService(cfg *configs.Config) *photoslibrary.Service {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := fmt.Sprintf("%s/token.json", cfg.CredentialPath)
+	tokFile := fmt.Sprintf("%s/token.json", credentialPath)
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
 		tok = getTokenFromWeb(oauthConfig)

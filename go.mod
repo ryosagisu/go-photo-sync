@@ -3,10 +3,11 @@ module google-photo-sync
 go 1.18
 
 require (
+	github.com/jmoiron/sqlx v1.3.5
+	github.com/pelletier/go-toml v1.9.5
 	golang.org/x/net v0.0.0-20220927171203-f486391704dc
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
 	google.golang.org/api v0.3.2
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (

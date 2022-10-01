@@ -1,4 +1,4 @@
 google_photo/
-configs/config.yaml
-configs/credentials.json
-configs/token.json
+configs/*.yaml
+configs/*.json
+configs/*.toml
