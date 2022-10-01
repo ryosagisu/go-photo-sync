@@ -9,6 +9,7 @@ import (
 	"google-photo-sync/configs"
 	"google-photo-sync/pkg/common"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -17,6 +18,7 @@ func Init() *Sync {
 
 	cfg := configs.ReadConfig(os.Getenv("CONFIG_PATH"))
 	ppg := cfg.PhotoPrismConfig
+	ppg.ImagePath = os.Getenv("IMAGE_PATH")
 	return &Sync{
 		Config: ppg,
 	}
@@ -32,8 +34,8 @@ func (pps *Sync) SyncImage() {
 			log.Fatalln(err)
 		}
 
-		log.Printf("Connected to %s\n", dbConfig.DBName)
-		favoritePhotos(db, pps.Config.SourcePath, pps.Config.DestinationPath)
+		log.Printf("Connected to %s\n", dbConfig.Name)
+		favoritePhotos(db, pps.Config.SourcePath, pps.Config.ImagePath, dbConfig.Name)
 		err = db.Close()
 		if err != nil {
 			log.Printf("failed to close connection: %v", err)
@@ -42,10 +44,11 @@ func (pps *Sync) SyncImage() {
 }
 
 // favoritePhotos queries for albums that have the specified artist name.
-func favoritePhotos(db *sqlx.DB, sourcePath, destinationPath string) {
+func favoritePhotos(db *sqlx.DB, sourcePath, destinationPath, name string) {
 	// An albums slice to hold data from returned rows.
 	var photos []Photos
-	localImages := common.ListLocalImages(destinationPath)
+	imagePath := fmt.Sprintf("%s/%s", destinationPath, name)
+	localImages := common.ListLocalImages(imagePath)
 
 	err := db.Select(&photos, "select photo_path, photo_name from photos where photo_favorite = 1 and photo_type = 'image'")
 	if err != nil {
@@ -53,22 +56,24 @@ func favoritePhotos(db *sqlx.DB, sourcePath, destinationPath string) {
 		return
 	}
 
-	log.Println("Syncing images...")
+	log.Printf("Syncing %d images\n", len(photos))
 	for _, photo := range photos {
-		targetPath := fmt.Sprintf("%s/%s.jpg", destinationPath, photo.PhotoName)
-		err := CopyFile(photo.getFilePath(sourcePath), targetPath)
+		targetPath := fmt.Sprintf("%s/%s.jpg", imagePath, photo.PhotoName)
+		filePath := photo.getFilePath(sourcePath)
+		err := CopyFile(filePath, targetPath)
 		if err != nil {
-			log.Printf("failed to copy file: %v", err)
+			log.Printf("failed to copy file from %s to %s: %v", filePath, targetPath, err)
 			continue
 		}
 
+		log.Printf("Copying %s.jpg\n", photo.PhotoName)
 		if localImages[photo.PhotoName] {
 			localImages[photo.PhotoName] = false
 		}
 	}
 
 	log.Println("Delete missing images...")
-	common.DeleteLocalFile(destinationPath, localImages)
+	common.DeleteLocalFile(imagePath, localImages)
 }
 
 // CopyFile copies a file from src to dst. If src and dst files exist, and are

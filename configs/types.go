@@ -8,14 +8,14 @@ type (
 
 	GooglePhotosConfig struct {
 		CredentialPath string `toml:"credential_path"`
-		ImagePath      string `toml:"image_path"`
 		AlbumId        string `toml:"album_id"`
+		ImagePath      string
 	}
 
 	PhotoPrismConfig struct {
-		SourcePath      string     `toml:"source_path"`
-		DestinationPath string     `toml:"destination_path"`
-		Databases       []Database `toml:"databases"`
+		SourcePath string     `toml:"source_path"`
+		Databases  []Database `toml:"databases"`
+		ImagePath  string
 	}
 
 	Database struct {
@@ -23,6 +23,6 @@ type (
 		Port     string `toml:"port"`
 		User     string `toml:"user"`
 		Password string `toml:"password"`
-		DBName   string `toml:"dbname"`
+		Name     string `toml:"dbname"`
 	}
 )

@@ -10,10 +10,6 @@ import (
 )
 
 func ReadConfig(configPath string) Config {
-	if configPath == "" {
-		log.Fatalln("CONFIG_PATH hasn't been set")
-	}
-
 	configFile := fmt.Sprintf("%s/config.toml", configPath)
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
@@ -45,16 +41,15 @@ func (db *Database) GetDSN() string {
 	if len(db.Host) > 0 {
 		buf.WriteByte('(')
 		buf.WriteString(db.Host)
+		if len(db.Port) > 0 {
+			buf.WriteByte(':')
+			buf.WriteString(db.Port)
+		}
 		buf.WriteByte(')')
-	}
-
-	if len(db.Port) > 0 {
-		buf.WriteByte(':')
-		buf.WriteString(db.Port)
 	}
 
 	// /dbname
 	buf.WriteByte('/')
-	buf.WriteString(db.DBName)
+	buf.WriteString(db.Name)
 	return buf.String()
 }

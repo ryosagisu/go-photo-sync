@@ -19,6 +19,8 @@ func Init() *Sync {
 
 	cfg := configs.ReadConfig(os.Getenv("CONFIG_PATH"))
 	gpc := cfg.GooglePhotosConfig
+	gpc.ImagePath = os.Getenv("IMAGE_PATH")
+
 	svc := GetService(gpc.CredentialPath)
 
 	client := &http.Client{

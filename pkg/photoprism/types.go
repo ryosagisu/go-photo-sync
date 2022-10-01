@@ -8,7 +8,7 @@ type (
 	}
 
 	Photos struct {
-		PhotoPath string
-		PhotoName string
+		PhotoPath string `db:"photo_path"`
+		PhotoName string `db:"photo_name"`
 	}
 )

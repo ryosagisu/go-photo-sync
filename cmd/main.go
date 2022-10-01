@@ -5,6 +5,7 @@ import (
 	"google-photo-sync/pkg/photoprism"
 	"log"
 	"os"
+	"time"
 
 	"google-photo-sync/pkg/google_photos"
 )
@@ -12,18 +13,27 @@ import (
 const (
 	SyncImage = "SyncImage"
 	ListAlbum = "ListAlbum"
+	DEBUG     = "debug"
 
-	GoogleService     = "Google"
-	PhotoprismService = "Photoprism"
+	GoogleService     = "google"
+	PhotoprismService = "photoprism"
 )
 
 func main() {
+	checkRequiredEnv()
+
 	command := flag.String("command", SyncImage, "command to execute")
 	flag.Parse()
 
 	service := os.Getenv("SYNC_SERVICE")
 	if service == "" {
 		service = GoogleService
+	}
+
+	if *command == DEBUG {
+		log.Println("Debugging mode")
+		time.Sleep(1 * time.Hour)
+		os.Exit(0)
 	}
 
 	switch service {
@@ -36,6 +46,16 @@ func main() {
 	}
 
 	log.Println("Good bye...")
+}
+
+func checkRequiredEnv() {
+	if os.Getenv("CONFIG_PATH") == "" {
+		log.Fatalln("CONFIG_PATH hasn't been set")
+	}
+
+	if os.Getenv("IMAGE_PATH") == "" {
+		log.Fatalln("IMAGE_PATH hasn't been set")
+	}
 }
 
 func googleSync(cmd string) {

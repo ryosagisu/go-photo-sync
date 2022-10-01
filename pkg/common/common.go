@@ -50,7 +50,7 @@ func IsValidImage(filePath string) bool {
 func DeleteLocalFile(filePath string, localImages map[string]bool) {
 	for k, v := range localImages {
 		if v {
-			imageFile := fmt.Sprintf(k, filePath)
+			imageFile := fmt.Sprintf("%s/%s.jpg", filePath, k)
 			err := os.Remove(imageFile)
 			if err != nil {
 				log.Printf("failed to delete local files: %v\n", err)

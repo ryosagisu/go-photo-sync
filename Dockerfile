@@ -20,5 +20,6 @@ WORKDIR /
 COPY --from=build /go-photo-sync /go-photo-sync
 
 ENV CONFIG_PATH=""
+ENV IMAGE_PATH=""
 ENTRYPOINT ["/go-photo-sync"]
 CMD ["-command=SyncImage"]
