@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	"google-photo-sync/configs"
 	"google-photo-sync/pkg/common"
@@ -50,7 +51,7 @@ func favoritePhotos(db *sqlx.DB, sourcePath, destinationPath, name string) {
 	imagePath := fmt.Sprintf("%s/%s", destinationPath, name)
 	localImages := common.ListLocalImages(imagePath)
 
-	err := db.Select(&photos, "select photo_path, photo_name from photos where photo_favorite = 1 and photo_type = 'image'")
+	err := db.Select(&photos, "select p.photo_path, p.photo_name, f.file_name from photos p left join files f on p.photo_uid = f.photo_uid where p.photo_favorite = 1 and p.photo_type = 'image' and f.file_root = '/'")
 	if err != nil {
 		log.Printf("query error: %v", err)
 		return
@@ -58,8 +59,9 @@ func favoritePhotos(db *sqlx.DB, sourcePath, destinationPath, name string) {
 
 	log.Printf("Syncing %d images\n", len(photos))
 	for _, photo := range photos {
-		targetPath := fmt.Sprintf("%s/%s.jpg", imagePath, photo.PhotoName)
-		filePath := photo.getFilePath(sourcePath)
+		filename := filepath.Base(photo.FileName)
+		targetPath := fmt.Sprintf("%s/%s", imagePath, filename)
+		filePath := fmt.Sprintf("%s/%s", sourcePath, photo.FileName)
 		err := CopyFile(filePath, targetPath)
 		if err != nil {
 			log.Printf("failed to copy file from %s to %s: %v", filePath, targetPath, err)

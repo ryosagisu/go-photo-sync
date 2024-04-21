@@ -10,5 +10,6 @@ type (
 	Photos struct {
 		PhotoPath string `db:"photo_path"`
 		PhotoName string `db:"photo_name"`
+		FileName  string `db:"file_name"`
 	}
 )
